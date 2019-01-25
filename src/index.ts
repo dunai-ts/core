@@ -1,3 +1,7 @@
+/**
+ * @module @dunai/core
+ * @preferred
+ */
 export * from './lib/Application';
 export * from './lib/Injector';
 export * from './lib/Service';

@@ -1,3 +1,3 @@
-# @dunai/test
+# @dunai/core
 
-test
+Core module of dunai framework
