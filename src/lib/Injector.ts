@@ -11,7 +11,7 @@ export class InjectorService {
      * @type {Map<string, Type<any>>}
      */
 
-    protected services: { [key: string]: any } = {};
+    protected services: { [key: string]: any }  = {};
     protected instances: { [key: string]: any } = {};
 
     /**
@@ -29,8 +29,8 @@ export class InjectorService {
         let serviceID = '';
         do {
             serviceID = Math.random()
-                .toString(36)
-                .substring(2);
+                            .toString(36)
+                            .substring(2);
         } while (serviceID in this.services);
 
         this.services[serviceID] = service;
@@ -50,7 +50,9 @@ export class InjectorService {
     }
 
     /**
-     * Reset all instances
+     * Remove all instances from cache.
+     *
+     * Using in tests
      */
     public reset(): void {
         this.instances = {};
@@ -87,12 +89,26 @@ export class InjectorService {
     public create<T>(target: Type<any>, ...params: any[]): T {
         // TODO circular dependency
         // TODO self dependency
+        this.checkForRegistered(target);
 
         const injections = this.makeInjections(target, params);
 
         const instance = new target(...injections);
 
+        const serviceID = Reflect.getMetadata('service_id', target);
+        if (serviceID)
+            Reflect.defineMetadata('instance_of', serviceID, instance);
+
         return instance;
+    }
+
+    /**
+     * Check entity for registered
+     * @param target
+     */
+    public checkForRegistered(target: any): boolean {
+        // TODO check in local list
+        return Reflect.getMetadata('instance_of', target) || Reflect.getMetadata('service_id', target);
     }
 
     /**
@@ -103,8 +119,6 @@ export class InjectorService {
      */
     private makeInjections(target: Type<any>, params: any[]): any[] {
         const tokens = Reflect.getMetadata('design:paramtypes', target) || [];
-        // console.log('tokens 1', Reflect.getMetadata('design:paramtypes', target));
-        console.log('tokens', tokens.length, ':', tokens);
         const injections = tokens.map((token: any, index: number) => {
             if (token === void 0) {
                 throw new Error(
@@ -117,9 +131,9 @@ export class InjectorService {
                 if (!serviceID)
                     throw new Error(
                         'Can not resolve dependency "' +
-                            token.name +
-                            '"\n' +
-                            "It's no provided custom parameter or dependency don't have @Service() decorator"
+                        token.name +
+                        '"\n' +
+                        'It\'s no provided custom parameter or dependency don\'t have @Service() decorator'
                     );
 
                 if (serviceID in this.instances) {
