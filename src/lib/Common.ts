@@ -11,3 +11,10 @@ export type Type<T> = new (...args: any[]) => T;
  * Generic `ClassDecorator` type
  */
 export type GenericClassDecorator<T> = (target: T) => void;
+
+/**
+ * Object with any additional options
+ */
+export interface IObject {
+    [key: string]: any;
+}

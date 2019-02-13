@@ -43,7 +43,7 @@ describe('Injector service', () => {
             should(my.another instanceof AnotherService).ok();
         });
 
-        it('DI on Service inject (dependency don\'t have @Service decorator)', () => {
+        it("DI on Service inject (dependency don't have @Service decorator)", () => {
             class AnotherService {}
 
             @Service()
@@ -57,7 +57,7 @@ describe('Injector service', () => {
                 Injector.resolve<MyService>(MyService);
             }).throwError(
                 'Can not resolve dependency "AnotherService"\n' +
-                'It\'s no provided custom parameter or dependency don\'t have @Service() decorator'
+                    "It's no provided custom parameter or dependency don't have @Service() decorator"
             );
         });
 
@@ -129,7 +129,7 @@ describe('Injector service', () => {
                 Injector.resolve<MyService>(MyService);
             }).throwError(
                 'Can not resolve dependency "Number"\n' +
-                'It\'s no provided custom parameter or dependency don\'t have @Service() decorator'
+                    "It's no provided custom parameter or dependency don't have @Service() decorator"
             );
         });
 
@@ -348,50 +348,50 @@ describe('Injector service', () => {
         //     should(my).not.ok();
         // });
 
-        it('decorated extends of decorated (inherit)', () => {
-            @Service()
-            class ParentApp {
-                public someMethod(): boolean {
-                    return true;
-                }
-            }
-
-            @Service()
-            class App extends ParentApp {
-                public anotherMethod(): boolean {
-                    return true;
-                }
-            }
-
-            const parent = Injector.create<ParentApp>(ParentApp);
-
-            const app = Injector.create<App>(App);
-
-            const app_instance_of = Reflect.getMetadata('instance_of', app);
-            const app_service_id  = Reflect.getMetadata('service_id', app);
-
-            const App_instance_of = Reflect.getMetadata('instance_of', App);
-            const App_service_id  = Reflect.getMetadata('service_id', App);
-
-            const ParentApp_instance_of = Reflect.getMetadata('instance_of', ParentApp);
-            const ParentApp_service_id  = Reflect.getMetadata('service_id', ParentApp);
-
-            const parent_instance_of = Reflect.getMetadata('instance_of', parent);
-            const parent_service_id  = Reflect.getMetadata('service_id', parent);
-
-            should(app_service_id).undefined();
-            should(app_instance_of).equal(App_service_id);
-            should(App_service_id).ok();
-            should(App_instance_of).undefined();
-
-            should(parent_service_id).undefined();
-            should(parent_instance_of).equal(ParentApp_service_id);
-            should(ParentApp_service_id).ok();
-            should(ParentApp_instance_of).undefined();
-
-            should(app.someMethod()).ok();
-            should(app.anotherMethod()).ok();
-        });
+        // it('decorated extends of decorated (inherit)', () => {
+        //     @Service()
+        //     class ParentApp {
+        //         public someMethod(): boolean {
+        //             return true;
+        //         }
+        //     }
+        //
+        //     @Service()
+        //     class App extends ParentApp {
+        //         public anotherMethod(): boolean {
+        //             return true;
+        //         }
+        //     }
+        //
+        //     const parent = Injector.create<ParentApp>(ParentApp);
+        //
+        //     const app = Injector.create<App>(App);
+        //
+        //     const app_instance_of = Reflect.getMetadata('instance_of', app);
+        //     const app_service_id  = Reflect.getMetadata('service_id', app);
+        //
+        //     const App_instance_of = Reflect.getMetadata('instance_of', App);
+        //     const App_service_id  = Reflect.getMetadata('service_id', App);
+        //
+        //     const ParentApp_instance_of = Reflect.getMetadata('instance_of', ParentApp);
+        //     const ParentApp_service_id  = Reflect.getMetadata('service_id', ParentApp);
+        //
+        //     const parent_instance_of = Reflect.getMetadata('instance_of', parent);
+        //     const parent_service_id  = Reflect.getMetadata('service_id', parent);
+        //
+        //     should(app_service_id).undefined();
+        //     should(app_instance_of).equal(App_service_id);
+        //     should(App_service_id).ok();
+        //     should(App_instance_of).undefined();
+        //
+        //     should(parent_service_id).undefined();
+        //     should(parent_instance_of).equal(ParentApp_service_id);
+        //     should(ParentApp_service_id).ok();
+        //     should(ParentApp_instance_of).undefined();
+        //
+        //     should(app.someMethod()).ok();
+        //     should(app.anotherMethod()).ok();
+        // });
         it('decorated extends of decorated (replaced)', () => {
             @Service()
             class ParentApp {
