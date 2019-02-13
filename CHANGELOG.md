@@ -7,6 +7,16 @@ All notable changes to this project will be documented in this file. See [standa
 
 
 
+<a name="0.1.6"></a>
+## [0.1.6](https://github.com/dunai-ts/core/compare/v0.1.4...v0.1.6) (2019-02-13)
+
+
+
+<a name="0.1.5"></a>
+## [0.1.5](https://github.com/dunai-ts/core/compare/v0.1.4...v0.1.5) (2019-02-13)
+
+
+
 <a name="0.1.4"></a>
 ## [0.1.4](https://github.com/dunai-ts/core/compare/v0.1.1...v0.1.4) (2019-02-04)
 
