@@ -263,27 +263,49 @@ describe('Injector service', () => {
             should(my.another.another2 instanceof Another2Service).ok();
         });
 
-        // it('DI with custom params', () => {
-        //     @Service()
-        //     class AnotherService {
-        //     }
-        //
-        //     @Service()
-        //     class MyService {
-        //         constructor(public prop: number = 0, public another?: AnotherService) {
-        //             console.log(prop, another);
-        //         }
-        //     }
-        //
-        //     const my: MyService = Injector.create<MyService>(MyService, 1);
-        //
-        //     should(my).ok();
-        //     should(my instanceof MyService).ok();
-        //     should(my).have.property('prop', 1);
-        //     should(typeof my.prop !== 'number').ok();
-        //     should(my.another).ok();
-        //     should(my.another instanceof AnotherService).ok();
-        // });
+        it('DI with custom params', () => {
+            @Service()
+            class AnotherService {
+            }
+
+            @Service()
+            class MyService {
+                constructor(public prop: number = 0, public another?: AnotherService) {
+                    console.log(prop, another);
+                }
+            }
+
+            const my: MyService = Injector.create<MyService>(MyService, 1);
+
+            should(my).ok();
+            should(my instanceof MyService).ok();
+            should(my).have.property('prop', 1);
+            should(my.prop).type('number');
+            should(my.another).ok();
+            should(my.another instanceof AnotherService).ok();
+        });
+
+        it('DI with custom params with default value', () => {
+            @Service()
+            class AnotherService {
+            }
+
+            @Service()
+            class MyService {
+                constructor(public prop: number = 0, public another?: AnotherService) {
+                    console.log(prop, another);
+                }
+            }
+
+            const my: MyService = Injector.create<MyService>(MyService);
+
+            should(my).ok();
+            should(my instanceof MyService).ok();
+            should(my).have.property('prop', 0);
+            should(my.prop).type('number');
+            should(my.another).ok();
+            should(my.another instanceof AnotherService).ok();
+        });
 
         it('DI with custom params and skip by null', () => {
             @Service()

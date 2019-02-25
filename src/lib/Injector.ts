@@ -129,12 +129,14 @@ export class InjectorService {
             if (params[index] === void 0 || params[index] === null) {
                 const serviceID = Reflect.getMetadata('service_id', token);
                 if (!serviceID)
-                    throw new Error(
-                        'Can not resolve dependency "' +
-                        token.name +
-                        '"\n' +
-                        'It\'s no provided custom parameter or dependency don\'t have @Service() decorator'
-                    );
+                    return params[index];
+                    //return null;
+                    //throw new Error(
+                    //    'Can not resolve dependency "' +
+                    //    token.name +
+                    //    '"\n' +
+                    //    'It\'s no provided custom parameter or dependency don\'t have @Service() decorator'
+                    //);
 
                 if (serviceID in this.instances) {
                     return this.instances[serviceID];
