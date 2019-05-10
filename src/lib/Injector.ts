@@ -26,6 +26,16 @@ export class InjectorService {
             }
         }
 
+        try {
+            const stack: string[] = (new Error()).stack.split('\n');
+            const str             = stack[6].match(/\((.*)\)$/);
+            const path            = str[1];
+
+            Reflect.defineMetadata('definition_in', path, service);
+        } catch (_) {
+            Reflect.defineMetadata('definition_in', null, service);
+        }
+
         let serviceID = '';
         do {
             serviceID = Math.random()
@@ -118,7 +128,7 @@ export class InjectorService {
      * @returns array of dependencies
      */
     private makeInjections(target: Type<any>, params: any[]): any[] {
-        const tokens = Reflect.getMetadata('design:paramtypes', target) || [];
+        const tokens     = Reflect.getMetadata('design:paramtypes', target) || [];
         const injections = tokens.map((token: any, index: number) => {
             if (token === void 0) {
                 throw new Error(
@@ -130,13 +140,13 @@ export class InjectorService {
                 const serviceID = Reflect.getMetadata('service_id', token);
                 if (!serviceID)
                     return params[index];
-                    //return null;
-                    //throw new Error(
-                    //    'Can not resolve dependency "' +
-                    //    token.name +
-                    //    '"\n' +
-                    //    'It\'s no provided custom parameter or dependency don\'t have @Service() decorator'
-                    //);
+                //return null;
+                //throw new Error(
+                //    'Can not resolve dependency "' +
+                //    token.name +
+                //    '"\n' +
+                //    'It\'s no provided custom parameter or dependency don\'t have @Service() decorator'
+                //);
 
                 if (serviceID in this.instances) {
                     return this.instances[serviceID];

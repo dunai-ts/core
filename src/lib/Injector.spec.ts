@@ -4,6 +4,23 @@ import { Injector } from './Injector';
 import { Service } from './Service';
 
 describe('Injector service', () => {
+    describe('declaration position', () => {
+        it('check declaration position', () => {
+            @Service()
+            class Service1 {}
+
+            //@Service()
+            //class Service2 {}
+            //
+            //@Service()
+            //class Service3 {}
+
+            const path1 = Reflect.getMetadata('declared_in', Service1);
+
+            should(path1).eql(path1);
+        });
+    });
+
     describe('resolve', () => {
         it('Service inject', () => {
             @Service()

@@ -4,9 +4,26 @@ import { Injector } from './Injector';
 export interface IDepNode {
     id: string;
     name: string;
-    //path: string;
-    //class: any;
+    path?: string;
     deps: IDepNode[];
+}
+
+class DepItemForPrint {
+    constructor(public prefix: string,
+                public node: IDepNode) {}
+
+    public print(): DepItemForPrint {
+        console.log(`${this.prefix}${this.node.name}`);
+        return this;
+    }
+
+    public addPrefix(prefix: string): DepItemForPrint {
+        return new DepItemForPrint(prefix + this.prefix, this.node);
+    }
+
+    public toString(viewPath = false): string {
+        return `${this.prefix}${this.node.name}` + ((viewPath && this.node.path) ? ` (${this.node.path})` : '');
+    }
 }
 
 export class DependencyTreeService {
@@ -39,31 +56,34 @@ export class DependencyTreeService {
         return Object.keys(services).map(this.getTreeForRootInner);
     }
 
-    public printSingleTree(tree: IDepNode): string[] {
-        const list: string[] = [];
+    public printTree(tree: IDepNode | IDepNode[], viewPath = true): string[] {
+        if (Array.isArray(tree)) {
+            const list: DepItemForPrint[] = [];
+            tree.forEach(root => list.push(...this.printSingleTree(root, viewPath)));
+            return list.map(item => item.print())
+                       .map(item => item.toString(viewPath));
+        } else {
+            return this.printSingleTree(tree, viewPath)
+                       .map(item => item.print())
+                       .map(item => item.toString(viewPath));
+        }
+    }
+
+    private printSingleTree(tree: IDepNode, viewPath = false): DepItemForPrint[] {
+        const list: DepItemForPrint[] = [];
 
         tree.deps.forEach((dep, index, arr) => {
             const isLast = index + 1 === arr.length;
             const prefix = isLast ? '\u2514 ' : '\u251C ';
-            const sub    = this.printTree(dep)
-                               .map((item, subindex) => (subindex ? (isLast ? '  ' : '\u2502 ') : prefix) + item);
+            const sub    = this.printSingleTree(dep, viewPath)
+                               .map((item, subindex) => (item.addPrefix(subindex ? (isLast ? '  ' : '\u2502 ') : prefix)));
             list.push(...sub);
         });
 
         return [
-            `${tree.name} (${tree.id})`,
+            new DepItemForPrint('', tree),
             ...list
         ];
-    }
-
-    public printTree(tree: IDepNode | IDepNode[]): string[] {
-        if (Array.isArray(tree)) {
-            const list: string[] = [];
-            tree.forEach(root => list.push(...this.printSingleTree(root)));
-            return list;
-        } else {
-            return this.printSingleTree(tree);
-        }
     }
 
     private getTokenForService(service: Type<any>): string {
@@ -74,7 +94,7 @@ export class DependencyTreeService {
 
     private getNameByToken(token: any): string {
         //return service.name;
-        console.log('getNameByToken', token, this.injector.services);
+        //console.log('getNameByToken', token, this.injector.services);
         return this.injector.services[token].name;
     }
 
@@ -101,17 +121,17 @@ export class DependencyTreeService {
 
     private getTreeForRootInner(token: string): IDepNode {
         const allDeps = this.getDeps();
-        console.log('getTreeForRootInner token', token);
+        //console.log('getTreeForRootInner token', token);
 
-        console.log(allDeps[token]);
+        //console.log(allDeps[token]);
 
         return {
             id  : token,
             name: this.getNameByToken(token),
-            //path : null,
+            path: Reflect.getMetadata('definition_in', this.injector.services[token]),
             //class: root,
             deps: allDeps[token].map(this.getTreeForRootInner)
-        };
+        } as any;
     }
 }
 
