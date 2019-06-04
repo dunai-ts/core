@@ -50,6 +50,7 @@ export class DependencyTreeService {
         const services = { ...this.injector.services };
 
         Object.keys(services).forEach(key => {
+            // tslint:disable-next-line
             dependencies[key].forEach(item => delete services[item]);
         });
 
@@ -93,25 +94,17 @@ export class DependencyTreeService {
     }
 
     private getNameByToken(token: any): string {
-        //return service.name;
-        //console.log('getNameByToken', token, this.injector.services);
         return this.injector.services[token].name;
     }
 
     private getDependencies(target: any): string[] {
-        //const services  = this.injector.services;
-        //const tokens    = Object.keys(this.injector.services);
-        //const serviceID = Reflect.getMetadata('service_id', target);
         const toks = Reflect.getMetadata('design:paramtypes', target) || [];
         return toks.map(this.getTokenForService);
     }
 
     private getDeps(): { [key: string]: string[] } {
-        const services = this.injector.services;
-        const tokens   = Object.keys(this.injector.services);
-        //console.log('services', services);
-        //console.log(Injector['instances']);
-        //console.log(tokens);
+        const services                          = this.injector.services;
+        const tokens                            = Object.keys(this.injector.services);
         const deps: { [key: string]: string[] } = {};
         tokens.forEach(key => {
             deps[key] = this.getDependencies(services[key]);
@@ -121,17 +114,13 @@ export class DependencyTreeService {
 
     private getTreeForRootInner(token: string): IDepNode {
         const allDeps = this.getDeps();
-        //console.log('getTreeForRootInner token', token);
-
-        //console.log(allDeps[token]);
 
         return {
             id  : token,
             name: this.getNameByToken(token),
             path: Reflect.getMetadata('definition_in', this.injector.services[token]),
-            //class: root,
-            deps: allDeps[token].map(this.getTreeForRootInner)
-        } as any;
+            deps: allDeps[token].map(this.getTreeForRootInner),
+        };
     }
 }
 

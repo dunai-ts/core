@@ -9,12 +9,6 @@ describe('Injector service', () => {
             @Service()
             class Service1 {}
 
-            //@Service()
-            //class Service2 {}
-            //
-            //@Service()
-            //class Service3 {}
-
             const path1 = Reflect.getMetadata('declared_in', Service1);
 
             should(path1).eql(path1);

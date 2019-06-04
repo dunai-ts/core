@@ -123,19 +123,19 @@ describe('dependency tree', () => {
         class Service5 {}
 
         @Service()
-        class Service4 {constructor(_: Service5) {}}
+        class Service4 {constructor(_: Service5) {return;}}
 
         @Service()
         class Service3 {}
 
         @Service()
-        class Service2 {constructor(_: Service4) {}}
+        class Service2 {constructor(_: Service4) {return;}}
 
         @Service()
-        class Service1 {constructor(_: Service2, __: Service3) {}}
+        class Service1 {constructor(_: Service2, __: Service3) {return;}}
 
         @Service()
-        class App {constructor(_: Service1) {}}
+        class App {constructor(_: Service1) {return;}}
 
         const sApp = Reflect.getMetadata('service_id', App);
         const sid1 = Reflect.getMetadata('service_id', Service1);
