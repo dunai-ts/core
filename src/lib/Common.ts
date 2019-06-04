@@ -13,7 +13,7 @@ export type Type<T> = new (...args: any[]) => T;
 export type GenericClassDecorator<T> = (target: T) => void;
 
 /**
- * Interface for objects, they may have custom property
+ * Object with any additional options
  * @protected
  */
 export interface IObject {

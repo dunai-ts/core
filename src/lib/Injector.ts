@@ -118,7 +118,10 @@ export class InjectorService {
      */
     public checkForRegistered(target: any): boolean {
         // TODO check in local list
-        return Reflect.getMetadata('instance_of', target) || Reflect.getMetadata('service_id', target);
+        return (
+            Reflect.getMetadata('instance_of', target) ||
+            Reflect.getMetadata('service_id', target)
+        );
     }
 
     /**
