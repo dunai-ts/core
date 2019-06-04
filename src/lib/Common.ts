@@ -14,6 +14,7 @@ export type GenericClassDecorator<T> = (target: T) => void;
 
 /**
  * Object with any additional options
+ * @protected
  */
 export interface IObject {
     [key: string]: any;
