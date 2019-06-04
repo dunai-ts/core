@@ -49,6 +49,11 @@
     /* end tslint-immutable rules */
 
     "curly": false,
-    "max-classes-per-file": false
+    "max-classes-per-file": false,
+    "object-literal-sort-keys": [
+      true,
+      "match-declaration-order"
+    ],
+    "no-object-literal-type-assertion": false
   }
 }
