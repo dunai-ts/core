@@ -1,5 +1,5 @@
 /**
- * @module @dunai/server
+ * @module @dunai/core
  */
 
 import 'reflect-metadata';

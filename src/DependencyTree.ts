@@ -1,3 +1,7 @@
+/**
+ * @module @dunai/core
+ */
+
 import { Type } from './Common';
 import { Injector } from './Injector';
 
