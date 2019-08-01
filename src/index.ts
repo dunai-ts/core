@@ -5,6 +5,7 @@
  *
  * The library may work in browser and on Node.js
  */
+export * from './Accessor';
 export * from './Common';
 export * from './DependencyTree';
 export * from './Injector';
