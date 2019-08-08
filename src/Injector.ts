@@ -4,6 +4,8 @@
 
 import 'reflect-metadata';
 import { Type } from './Common';
+import { INJECTOR_INJECT_PARAM } from './Inject';
+import { CONSTRUCTOR_KEY, getControllerMetadata } from './ParamDecoration';
 
 export class InjectorService {
     /**
@@ -11,7 +13,7 @@ export class InjectorService {
      * @type {Map<string, Type<any>>}
      */
 
-    protected services: { [key: string]: any }  = {};
+    protected services: { [key: string]: any } = {};
     protected instances: { [key: string]: any } = {};
 
     /**
@@ -28,8 +30,8 @@ export class InjectorService {
 
         try {
             const stack: string[] = (new Error()).stack.split('\n');
-            const str             = stack[6].match(/\((.*)\)$/);
-            const path            = str[1];
+            const str = stack[6].match(/\((.*)\)$/);
+            const path = str[1];
 
             Reflect.defineMetadata('definition_in', path, service);
         } catch (_) {
@@ -39,8 +41,8 @@ export class InjectorService {
         let serviceID = '';
         do {
             serviceID = Math.random()
-                            .toString(36)
-                            .substring(2);
+                .toString(36)
+                .substring(2);
         } while (serviceID in this.services);
 
         this.services[serviceID] = service;
@@ -73,7 +75,7 @@ export class InjectorService {
      * @param {Type<any>} target
      * @returns {T}
      */
-    public resolve<T>(target: Type<any>, ...params: any[]): T {
+    public resolve<T>(target: Type<T>, ...params: any[]): T {
         // TODO cilcular dependency
         // TODO self dependency
 
@@ -94,14 +96,57 @@ export class InjectorService {
     /**
      * Create new instance with injection required services
      * @param {Type<any>} target
+     * @param {any[]} params Extended parameters
      * @returns {T}
      */
-    public create<T>(target: Type<any>, ...params: any[]): T {
+    public create<T>(target: Type<T>, ...params: any[]): T {
         // TODO circular dependency
         // TODO self dependency
         this.checkForRegistered(target);
 
         const injections = this.makeInjections(target, params);
+
+        const instance = new target(...injections);
+
+        const serviceID = Reflect.getMetadata('service_id', target);
+        if (serviceID)
+            Reflect.defineMetadata('instance_of', serviceID, instance);
+
+        return instance;
+    }
+
+    /**
+     * Create new instance with injection required services
+     * @param {Type<any>} target
+     * @param tokens Tokens for creating
+     * @param {any[]} params Extended parameters
+     * @returns {T}
+     */
+    public createWithInjects<T>(target: Type<T>,
+                                tokens: { [token: string]: any },
+                                ...params: any[]): T {
+        if (typeof tokens !== 'object')
+            throw new Error('Argument "tokens" has invalid type');
+
+        // TODO circular dependency
+        // TODO self dependency
+        this.checkForRegistered(target);
+
+        const injections = this.makeInjections(target, params);
+
+        getControllerMetadata(target).methodParams[CONSTRUCTOR_KEY].forEach(
+            (value, index) => {
+                if (!value)
+                    return;
+                const inject = value.find(item => item.type === INJECTOR_INJECT_PARAM);
+                if (!inject)
+                    return;
+                const v = inject.useFunction(tokens);
+                if (v === void 0)
+                    return;
+                injections[index] = v;
+            },
+        );
 
         const instance = new target(...injections);
 
@@ -131,31 +176,40 @@ export class InjectorService {
      * @returns array of dependencies
      */
     private makeInjections(target: Type<any>, params: any[]): any[] {
-        const tokens     = Reflect.getMetadata('design:paramtypes', target) || [];
+        const tokens = Reflect.getMetadata('design:paramtypes', target) || [];
         const injections = tokens.map((token: any, index: number) => {
             if (token === void 0) {
                 throw new Error(
-                    'Dependency has type "undefined". It\'s may be circular dependency or no provided custom parameter'
+                    'Dependency has type "undefined". It\'s may be circular dependency or no provided custom parameter',
                 );
             }
 
             if (params[index] === void 0 || params[index] === null) {
                 const serviceID = Reflect.getMetadata('service_id', token);
-                if (!serviceID)
-                    return params[index];
-                // return null;
-                // throw new Error(
-                //    'Can not resolve dependency "' +
-                //    token.name +
-                //    '"\n' +
-                //    'It\'s no provided custom parameter or dependency don\'t have @Service() decorator'
-                // );
+                if (serviceID) {
+                    if (serviceID in this.instances) {
+                        return this.instances[serviceID];
+                    } else {
+                        return this.resolve<any>(token);
+                    }
+                } else {
+                    if (params[index] !== void 0)
+                        return params[index];
 
-                if (serviceID in this.instances) {
-                    return this.instances[serviceID];
+                    return undefined;
+                    // console.log('unregistered', index, token);
+                    //
+                    // return null;
+                    // throw new Error(
+                    //     'Can not resolve dependency "' +
+                    //     token.name +
+                    //     '"\n' +
+                    //     'It\'s no provided custom parameter or ' +
+                    //     'dependency doesn\'t have @Service() decorator',
+                    // );
+                    //
+                    // return this.resolve<any>(token);
                 }
-
-                return this.resolve<any>(token);
             } else {
                 return params[index];
             }

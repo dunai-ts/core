@@ -7,6 +7,8 @@ import { Type } from './Common';
 
 const CONTROLLER_META_KEY = 'dunai:controller';
 
+export const CONSTRUCTOR_KEY = '__constructor';
+
 export type IDecoratedParamResolveData = any;
 
 export type IDecoratedParamResolveFunction = (data: IDecoratedParamResolveData, value?: any) => any;
@@ -30,15 +32,16 @@ export interface IDecoratedParamResolver {
 // tslint:disable-next-line
 export function addControllerParamDecoration(decoration: IDecoratedParamDecoration) {
     return (controller: Type<any>, propertyKey: string, index: number) => {
+        const method = propertyKey || CONSTRUCTOR_KEY;
         const meta = getControllerMetadata(controller);
 
-        if (!meta.methodParams[propertyKey])
-            meta.methodParams[propertyKey] = [];
+        if (!meta.methodParams[method])
+            meta.methodParams[method] = [];
 
-        if (!meta.methodParams[propertyKey][index])
-            meta.methodParams[propertyKey][index] = [];
+        if (!meta.methodParams[method][index])
+            meta.methodParams[method][index] = [];
 
-        meta.methodParams[propertyKey][index].push(decoration);
+        meta.methodParams[method][index].push(decoration);
     };
 }
 
@@ -85,15 +88,15 @@ export function runMethod<T>(controller: any, method: string) {
             values.push(
                 items.reduce(
                     (value, func) => value.then(val => func(data, val)),
-                    new Promise(resolve => resolve(rest[index]))
-                )
+                    new Promise(resolve => resolve(rest[index])),
+                ),
             );
         }
 
         return Promise.all(values)
-                      .then(
-                          resolved => controller[method](...resolved)
-                      );
+            .then(
+                resolved => controller[method](...resolved),
+            );
     };
 }
 
@@ -111,7 +114,7 @@ export function getControllerMetadata(target: any): IControllerMeta {
     } else {
         const meta: IControllerMeta = {
             methodParams   : {},
-            preparedMethods: null
+            preparedMethods: null,
         };
         Reflect.defineMetadata(CONTROLLER_META_KEY, meta, proto);
         return meta;
